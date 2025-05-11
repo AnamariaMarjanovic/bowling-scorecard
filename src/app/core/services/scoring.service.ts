@@ -21,9 +21,9 @@ export class ScoringService {
       frame.isSpare = this.isSpare(frame);
 
       if (frame.isStrike) {
-        frame.score = this.calculateStrike(scorredFrames, i);
+        frame.score = 10 + this.getNextTwoPins(scorredFrames, i);
       } else if (frame.isSpare) {
-        frame.score = this.calculateSpare(scorredFrames, i);
+        frame.score = 10 + this.getNextPin(scorredFrames, i);
       } else {
         frame.score = this.calculateOpenFrame(frame.attempts);
       }
@@ -40,20 +40,29 @@ export class ScoringService {
     return frame.attempts.length === 2 && this.calculateOpenFrame(frame.attempts) === 10;
   }
 
-  private calculateStrike(frames: Frame[], i: number): number {
-    const nextFrame = frames[i + 1];
-
-    if (!nextFrame) return 0;
-
-    return nextFrame.attempts[0].pins + nextFrame.attempts[1].pins;
-  }
-
-  private calculateSpare(frames: Frame[], i: number): number {
+  private getNextPin(frames: Frame[], i: number): number {
     const nextFrame = frames[i + 1];
     return nextFrame?.attempts[0]?.pins ?? 0;
   }
 
-   private calculateOpenFrame(attempts: Attempt[]): number {
+  private getNextTwoPins(frames: Frame[], i: number): number {
+    const nextFrame = frames[i + 1];
+    const frameAfter = frames[i + 2];
+
+    if (!nextFrame) return 0;
+
+    if (nextFrame.attempts.length >= 2) {
+      return nextFrame.attempts[0].pins + nextFrame.attempts[1].pins;
+    } else if (nextFrame.attempts.length === 1) {
+      const first = nextFrame.attempts[0].pins;
+      const second = frameAfter?.attempts[0]?.pins ?? 0;
+      return first + second;
+    }
+
+    return 0;
+  }
+
+  private calculateOpenFrame(attempts: Attempt[]): number {
     return attempts.reduce((sum, attempt) => sum + attempt.pins, 0);
   }
 }
