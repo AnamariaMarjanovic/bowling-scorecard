@@ -8,28 +8,33 @@ import { Attempt } from '../models/attempt.model';
 export class ScoringService {
 
   calculateScore(frames: Frame[]): Frame[] {
-    const scorredFrames = [...frames];
 
-    for (let i = 0; i < scorredFrames.length; i++) {
-      const frame = scorredFrames[i];
+    // STRIKE (X) - all pins knocked down at first attempt; 10 p + number of pins for entire next frame
+    // SPARE (/) - all pins knocked down after seconf attempt; 10 p + number of pins for first attempt of next frame
+    // OPEN FRAME - sum of all attempts in the frame
 
-      // STRIKE (X) - all pins knocked down at first attempt; 10 p + number of pins for entire next frame
-      // SPARE (/) - all pins knocked down after seconf attempt; 10 p + number of pins for first attempt of next frame
-      // OPEN FRAME - sum of all attempts in the frame
+    const result = frames.map((frame, i) => {
+      const isStrike = this.isStrike(frame);
+      const isSpare = this.isSpare(frame);
+      let score = null;
 
-      frame.isStrike = this.isStrike(frame);
-      frame.isSpare = this.isSpare(frame);
-
-      if (frame.isStrike) {
-        frame.score = 10 + this.getNextTwoPins(scorredFrames, i);
-      } else if (frame.isSpare) {
-        frame.score = 10 + this.getNextPin(scorredFrames, i);
+      if (isStrike) {
+        score = 10 + this.getNextTwoPins(frames, i);
+      } else if (isSpare) {
+        score = 10 + this.getNextPin(frames, i);
       } else {
-        frame.score = this.calculateOpenFrame(frame.attempts);
+        score = this.calculateOpenFrame(frame.attempts);
       }
-    }
 
-    return scorredFrames;
+      return {
+        ...frame,
+        isStrike,
+        isSpare,
+        score
+      };
+    });
+
+    return result;
   }
 
   private isStrike(frame: Frame): boolean {

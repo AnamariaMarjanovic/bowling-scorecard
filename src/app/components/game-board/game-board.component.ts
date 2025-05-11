@@ -1,11 +1,115 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { combineLatest, map, Observable, take } from 'rxjs';
+import { Frame } from '../../core/models/frame.model';
+import {
+  selectCurrentFrame,
+  selectFrames,
+  selectGame,
+  selectIsGameCompleted
+} from '../../store/selectors/game.selectors';
+import { addAttempt, resetGame } from '../../store/actions/game.actions';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-game-board',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './game-board.component.html',
   styleUrl: './game-board.component.scss'
 })
 export class GameBoardComponent {
+  frames$: Observable<Frame[]>;
+  currentFrame$: Observable<Frame>;
+  isGameCompleted$: Observable<boolean>;
 
+  constructor(private store: Store) {
+    this.frames$ = this.store.select(selectFrames);
+    this.isGameCompleted$ = this.store.select(selectIsGameCompleted);
+
+    this.currentFrame$ = combineLatest([
+      this.frames$,
+      this.store.select(selectCurrentFrame)
+    ]).pipe(
+      map(([frames, index]) => frames[index])
+    );
+  }
+
+  submitAttempt(input: number | string): void {
+    this.store.select(selectGame).pipe(take(1)).subscribe(game => {
+      const currentFrameIndex = game.currentFrame;
+      const currentFrame = game.frames[game.currentFrame];
+      const isFirstAttempt = currentFrame.attempts.length === 0;
+      const isTenthFrame = currentFrameIndex === 9;
+
+      console.log(currentFrame.attempts)
+      let pins: number;
+
+      if (input === 'X') {
+        if (!isFirstAttempt && !isTenthFrame) return;
+        pins = 10;
+      } else if (input === '/') {
+        if (isFirstAttempt) return;
+        const firstPins = currentFrame.attempts[currentFrame.attempts.length - 1]?.pins ?? 0;
+        pins = 10 - firstPins;
+      } else {
+        pins = input as number;
+      }
+
+      if (isTenthFrame) {
+        const attempts = currentFrame.attempts;
+        const [first, second] = attempts;
+
+        if (attempts.length >= 3) return;
+
+        if (attempts.length === 2) {
+          const total = first?.pins + second?.pins;
+          const hasBonus = first?.pins === 10 || total === 10;
+          if (!hasBonus) return;
+        }
+      }
+
+      this.store.dispatch(addAttempt({ pins }));
+    });
+  }
+
+  isSpare(frame: Frame): boolean {
+    return (
+      frame.attempts.length === 2 &&
+      !this.isStrike(frame) &&
+      frame.attempts[0].pins + frame.attempts[1].pins === 10
+    );
+  }
+
+  isStrike(frame: Frame): boolean {
+    return frame.attempts.length === 1 && frame.attempts[0]?.pins === 10;
+  }
+
+  getDisabledPins(frame: Frame): boolean[] {
+    const disabled = Array(11).fill(false);
+    const isSecondAttempt = frame.attempts.length === 1;
+
+    if (isSecondAttempt) {
+      const firstPins = frame.attempts[0].pins;
+      for (let i = 0; i <= 10; i++) {
+        if (firstPins + i > 10) {
+          disabled[i] = true;
+        }
+      }
+    }
+
+    return disabled;
+  }
+
+  disableSpare(frame: Frame): boolean {
+    return frame.attempts.length !== 1 || frame.attempts[0].pins >= 10;
+  }
+
+  disableStrike(frame: Frame): boolean {
+    return frame.attempts.length !== 0;
+  }
+
+  resetGame(): void {
+    this.store.dispatch(resetGame());
+  }
 }
