@@ -42,7 +42,6 @@ export class GameBoardComponent {
       const isFirstAttempt = currentFrame.attempts.length === 0;
       const isTenthFrame = currentFrameIndex === 9;
 
-      console.log(currentFrame.attempts)
       let pins: number;
 
       if (input === 'X') {
@@ -58,14 +57,19 @@ export class GameBoardComponent {
 
       if (isTenthFrame) {
         const attempts = currentFrame.attempts;
-        const [first, second] = attempts;
 
-        if (attempts.length >= 3) return;
+        if (attempts.length === 3) return;
 
-        if (attempts.length === 2) {
-          const total = first?.pins + second?.pins;
-          const hasBonus = first?.pins === 10 || total === 10;
-          if (!hasBonus) return;
+        const first = attempts[0]?.pins ?? 0;
+        const second = attempts[1]?.pins ?? 0;
+
+        if (attempts.length === 0) {
+        } else if (attempts.length === 1) {
+        } else if (attempts.length === 2) {
+          const isStrike = first === 10;
+          const isSpare = first + second === 10;
+
+          if (!isStrike && !isSpare) return;
         }
       }
 
@@ -74,11 +78,9 @@ export class GameBoardComponent {
   }
 
   isSpare(frame: Frame): boolean {
-    return (
-      frame.attempts.length === 2 &&
-      !this.isStrike(frame) &&
-      frame.attempts[0].pins + frame.attempts[1].pins === 10
-    );
+    return frame.attempts.length >= 2 &&
+      frame.attempts[0].pins < 10 &&
+      (frame.attempts[0].pins + frame.attempts[1].pins === 10);
   }
 
   isStrike(frame: Frame): boolean {
@@ -87,8 +89,12 @@ export class GameBoardComponent {
 
   getDisabledPins(frame: Frame): boolean[] {
     const disabled = Array(11).fill(false);
-    const isSecondAttempt = frame.attempts.length === 1;
 
+    if (frame.attempts.length >= 1 && frame.attempts.length <= 2 && frame.isLastFrame) {
+      return disabled;
+    }
+
+    const isSecondAttempt = frame.attempts.length === 1;
     if (isSecondAttempt) {
       const firstPins = frame.attempts[0].pins;
       for (let i = 0; i <= 10; i++) {
@@ -106,6 +112,10 @@ export class GameBoardComponent {
   }
 
   disableStrike(frame: Frame): boolean {
+    if (frame.isLastFrame) {
+      return frame.attempts.length >= 3;
+    }
+
     return frame.attempts.length !== 0;
   }
 

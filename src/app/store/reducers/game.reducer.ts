@@ -28,9 +28,10 @@ export const gameReducer = createReducer(
     const indexCurrentFrame = state.game.currentFrame;
     const currentFrame = state.game.frames[indexCurrentFrame];
 
-    const newFrame = {
+    const newFrame: Frame = {
       ...currentFrame,
       attempts: [...currentFrame.attempts, { pins }],
+      isLastFrame: currentFrame.isLastFrame
     };
 
     const newFrames = [...state.game.frames];
@@ -38,16 +39,21 @@ export const gameReducer = createReducer(
 
     const scoredFrames = scoringService.calculateScore(newFrames);
 
-    const newGame = {
+    const isFinalFrame = indexCurrentFrame === 9;
+    const frameComplete = checkIfFrameComplete(newFrame, isFinalFrame);
+
+    const nextFrameIndex = isFinalFrame ? indexCurrentFrame : (frameComplete ? indexCurrentFrame + 1 : indexCurrentFrame);
+
+    const updatedGame: Game = {
       ...state.game,
       frames: scoredFrames,
-      currentFrame: checkIfFrameComplete(newFrame, indexCurrentFrame === 9) ? indexCurrentFrame + 1 : indexCurrentFrame,
-      isCompleted: checkIfGameComplete(state.game),
-    }
+      currentFrame: nextFrameIndex,
+      isCompleted: checkIfGameComplete({ ...state.game, frames: scoredFrames })
+    };
 
     return {
       ...state,
-      game: newGame
+      game: updatedGame
     };
   }),
 
@@ -58,12 +64,12 @@ export const gameReducer = createReducer(
 
 function createInitialGame(): Game {
   return {
-    frames: Array(10).fill(null).map(() => ({
+    frames: Array(10).fill(null).map((_, i) => ({
       attempts: [],
       score: null,
       isStrike: false,
       isSpare: false,
-      isLastFrame: false
+      isLastFrame: i === 9
     })),
     currentFrame: 0,
     isCompleted: false
@@ -71,11 +77,22 @@ function createInitialGame(): Game {
 }
 
 function checkIfFrameComplete(frame: Frame, isFinalFrame: boolean): boolean {
-  if (isFinalFrame) {
-    return frame.attempts.length >= 2 || frame.attempts[0]?.pins === 10;
+  const attempts = frame.attempts;
+  const first = attempts[0]?.pins ?? 0;
+  const second = attempts[1]?.pins ?? 0;
+
+  if (!isFinalFrame) {
+    return first === 10 || attempts.length === 2;
   }
 
-  return frame.attempts[0]?.pins === 10 || frame.attempts.length === 2;
+  const isStrike = first === 10;
+  const isSpare = first + second === 10;
+
+  if (isStrike || isSpare || isFinalFrame) {
+    return attempts.length === 3;
+  }
+
+  return attempts.length === 2;
 }
 
 function checkIfGameComplete(game: Game): boolean {

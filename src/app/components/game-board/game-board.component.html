@@ -14,13 +14,13 @@
             <tr class="rolls-row">
                 <ng-container *ngFor="let frame of frames; let i = index">
 
-                    <td class="cell-first-attempt">
+                    <td *ngIf="i < 9" class="cell-first-attempt">
                         <ng-container *ngIf="frame.attempts.length > 0 && !isStrike(frame)">
                             {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
                         </ng-container>
                     </td>
 
-                    <td class="cell-second-attempt">
+                    <td *ngIf="i < 9" class="cell-second-attempt">
                         <ng-container *ngIf="frame.attempts.length > 0 && isStrike(frame)">
                             {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
                         </ng-container>
@@ -31,8 +31,22 @@
                         </ng-container>
                     </td>
 
+
+                    <!-- 10th frame -->
+                    <td *ngIf="i === 9" class="cell-first-attempt">
+                        {{ frame.attempts.length > 0 ? (frame.attempts[0].pins === 10 ? 'X' : frame.attempts[0].pins) :
+                        '' }}
+                    </td>
+                    <td *ngIf="i === 9" class="cell-second-attempt">
+                        {{ frame.attempts.length > 1
+                        ? (frame.attempts[1].pins === 10 ? 'X'
+                        : (frame.attempts[0].pins + frame.attempts[1].pins === 10 ? '/' : frame.attempts[1].pins))
+                        : '' }}
+                    </td>
                     <td *ngIf="i === 9" class="cell-third-attempt">
-                        {{ frame.attempts[2] ? (frame.attempts[2].pins || '-') : '' }}
+                        {{ frame.attempts.length > 2
+                        ? (frame.attempts[2].pins === 10 ? 'X' : frame.attempts[2].pins)
+                        : '' }}
                     </td>
                 </ng-container>
             </tr>
@@ -47,6 +61,11 @@
         </tbody>
 
     </table>
+
+    <div *ngIf="isGameCompleted$ | async" class="game-over">
+        <h3>🎉 Game Over</h3>
+        <button (click)="resetGame()">Start New Game</button>
+    </div>
 </ng-container>
 
 <ng-container *ngIf="currentFrame$ | async as currentFrame">
@@ -72,8 +91,3 @@
         <button class="reset" (click)="resetGame()">Reset</button>
     </div>
 </ng-container>
-
-<div *ngIf="isGameCompleted$ | async" class="game-over">
-    <h3>🎉 Game Over</h3>
-    <button (click)="resetGame()">Start New Game</button>
-</div>

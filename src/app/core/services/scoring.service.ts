@@ -13,26 +13,49 @@ export class ScoringService {
     // SPARE (/) - all pins knocked down after seconf attempt; 10 p + number of pins for first attempt of next frame
     // OPEN FRAME - sum of all attempts in the frame
 
-    const result = frames.map((frame, i) => {
-      const isStrike = this.isStrike(frame);
-      const isSpare = this.isSpare(frame);
-      let score = null;
+    const result: Frame[] = [];
+    let runningTotal = 0;
 
-      if (isStrike) {
-        score = 10 + this.getNextTwoPins(frames, i);
-      } else if (isSpare) {
-        score = 10 + this.getNextPin(frames, i);
-      } else {
-        score = this.calculateOpenFrame(frame.attempts);
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+      const isTenth = i === 9;
+      let frameScore = null;
+
+      if (isTenth) {
+        // ✅ In 10th frame, sum all available attempts (1–3)
+        frameScore = this.calculateOpenFrame(frame.attempts);
+        runningTotal += frameScore;
+        result.push({ ...frame, score: frameScore, isLastFrame: true });
+        continue;
       }
 
-      return {
+      const isStrike = this.isStrike(frame);
+      const isSpare = this.isSpare(frame);
+
+      if (isStrike) {
+        frameScore = 10 + this.getNextTwoPins(frames, i);
+      } else if (isSpare) {
+        frameScore = 10 + this.getNextPin(frames, i);
+      } else {
+        frameScore = this.calculateOpenFrame(frame.attempts);
+      }
+
+      const isScorable = (isStrike && this.getNextTwoPins(frames, i) !== 0) ||
+        (isSpare && this.getNextPin(frames, i) !== 0) ||
+        (!isStrike && !isSpare);
+
+      if (isScorable) {
+        runningTotal += frameScore;
+      }
+
+      result.push({
         ...frame,
         isStrike,
         isSpare,
-        score
-      };
-    });
+        score: isScorable ? runningTotal : null,
+        isLastFrame: frame.isLastFrame
+      });
+    }
 
     return result;
   }
