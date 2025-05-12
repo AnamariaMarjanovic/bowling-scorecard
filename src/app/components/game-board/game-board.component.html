@@ -62,6 +62,12 @@
 
     </table>
 
+    <div class="total-score-cell">
+        <span *ngIf="isGameCompleted$ | async">
+            <strong>Total:</strong> {{ totalScore$ | async }}
+        </span>
+    </div>
+
     <div *ngIf="isGameCompleted$ | async" class="game-over">
         <h3>🎉 Game Over</h3>
         <button (click)="resetGame()">Start New Game</button>
@@ -74,17 +80,17 @@
 
         <!-- Pin buttons 0–10 -->
         <button *ngFor="let p of [].constructor(10); let i = index" (click)="submitAttempt(i)"
-            [disabled]="getDisabledPins(currentFrame)[i]">
+            [disabled]="(isGameCompleted$ | async) || getDisabledPins(currentFrame)[i]">
             {{ i }}
         </button>
 
         <!-- Btn for Strike -->
-        <button (click)="submitAttempt('X')" [disabled]="disableStrike(currentFrame)">
+        <button (click)="submitAttempt('X')" [disabled]="(isGameCompleted$ | async) || disableStrike(currentFrame)">
             X
         </button>
 
         <!-- Btn for Spare -->
-        <button (click)="submitAttempt('/')" [disabled]="disableSpare(currentFrame)">
+        <button (click)="submitAttempt('/')" [disabled]="(isGameCompleted$ | async) || disableSpare(currentFrame)">
             /
         </button>
 

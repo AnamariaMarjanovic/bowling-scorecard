@@ -22,10 +22,16 @@ export class ScoringService {
       let frameScore = null;
 
       if (isTenth) {
-        // ✅ In 10th frame, sum all available attempts (1–3)
         frameScore = this.calculateOpenFrame(frame.attempts);
         runningTotal += frameScore;
-        result.push({ ...frame, score: frameScore, isLastFrame: true });
+
+        result.push({
+          ...frame,
+          isStrike: this.isStrike(frame),
+          isSpare: this.isSpare(frame),
+          score: runningTotal,
+          isLastFrame: true
+        });
         continue;
       }
 

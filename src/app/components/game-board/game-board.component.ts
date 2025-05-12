@@ -22,6 +22,7 @@ export class GameBoardComponent {
   frames$: Observable<Frame[]>;
   currentFrame$: Observable<Frame>;
   isGameCompleted$: Observable<boolean>;
+  totalScore$: Observable<number>
 
   constructor(private store: Store) {
     this.frames$ = this.store.select(selectFrames);
@@ -32,6 +33,10 @@ export class GameBoardComponent {
       this.store.select(selectCurrentFrame)
     ]).pipe(
       map(([frames, index]) => frames[index])
+    );
+
+    this.totalScore$ = this.frames$.pipe(
+      map(frames => frames[9]?.score ?? 0)
     );
   }
 
