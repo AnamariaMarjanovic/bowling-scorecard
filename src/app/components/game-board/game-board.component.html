@@ -1,99 +1,114 @@
-<h2>Bowling Scorecard</h2>
+<div class="relative grid p-10">
+    <h2 class="text-2xl font-bold text-center my-4">
+        Bowling Scorecard
+    </h2>
 
-<ng-container *ngIf="frames$ | async as frames">
-    <table class="scoreboard">
-        <thead>
-            <tr class="frame-row">
-                <th *ngFor="let frame of frames; let i = index" [attr.colspan]="i === 9 ? 3 : 2">
-                    {{ i + 1 }}
-                </th>
-            </tr>
-        </thead>
+    <ng-container *ngIf="frames$ | async as frames">
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed border border-gray-300 text-center text-sm bg-white shadow">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th *ngFor="let frame of frames; let i = index" [attr.colspan]="i === 9 ? 3 : 2"
+                            class="border border-gray-300 px-2 py-1 font-semibold">
+                            {{ i + 1 }}
+                        </th>
+                    </tr>
+                </thead>
 
-        <tbody>
-            <tr class="rolls-row">
-                <ng-container *ngFor="let frame of frames; let i = index">
+                <tbody>
+                    <tr>
+                        <ng-container *ngFor="let frame of frames; let i = index">
 
-                    <td *ngIf="i < 9" class="cell-first-attempt">
-                        <ng-container *ngIf="frame.attempts.length > 0 && !isStrike(frame)">
-                            {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
+                            <!-- Frames 1–9 -->
+                            <td *ngIf="i < 9" class="border border-gray-300 h-10 align-middle border-b-0">
+                                <ng-container *ngIf="frame.attempts.length > 0 && !isStrike(frame)">
+                                    {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
+                                </ng-container>
+                            </td>
+
+                            <td *ngIf="i < 9" class="border border-gray-300 h-10 align-middle">
+                                <ng-container *ngIf="frame.attempts.length > 0 && isStrike(frame)">
+                                    {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
+                                </ng-container>
+                                <ng-container *ngIf="frame.attempts.length > 1">
+                                    {{ isSpare(frame) ? '/' : (frame.attempts[1].pins || '-') }}
+                                </ng-container>
+                            </td>
+
+                            <!-- 10th frame -->
+                            <td *ngIf="i === 9" class="border border-gray-300 h-10 align-middle">
+                                {{ frame.attempts.length > 0 ? (frame.attempts[0].pins === 10 ? 'X' :
+                                frame.attempts[0].pins) : '' }}
+                            </td>
+                            <td *ngIf="i === 9" class="border border-gray-300 h-10 align-middle">
+                                {{ frame.attempts.length > 1
+                                ? (frame.attempts[1].pins === 10 ? 'X'
+                                : (frame.attempts[0].pins + frame.attempts[1].pins === 10 ? '/' :
+                                frame.attempts[1].pins))
+                                : '' }}
+                            </td>
+                            <td *ngIf="i === 9" class="border border-gray-300 h-10 align-middle">
+                                {{ frame.attempts.length > 2
+                                ? (frame.attempts[2].pins === 10 ? 'X' : frame.attempts[2].pins)
+                                : '' }}
+                            </td>
                         </ng-container>
-                    </td>
+                    </tr>
 
-                    <td *ngIf="i < 9" class="cell-second-attempt">
-                        <ng-container *ngIf="frame.attempts.length > 0 && isStrike(frame)">
-                            {{ isStrike(frame) ? 'X' : (frame.attempts[0].pins || '-') }}
+                    <tr class="min-h-[50px]">
+                        <ng-container *ngFor="let frame of frames; let i = index">
+                            <td [attr.colspan]="i === 9 ? 3 : 2"
+                                class="border border-gray-300 py-1 font-medium text-gray-700 border-t-0 min-h-[50px]">
+                                {{ frame.score ?? '&nbsp;' }}
+                            </td>
                         </ng-container>
-                        <ng-container *ngIf="frame.attempts.length > 1">
-                            {{ isSpare(frame) ? '/' : (frame.attempts[1].pins || '-') }}
-                        </ng-container>
-                        <ng-container *ngIf="isStrike(frame) && frame.attempts.length === 1">
-                        </ng-container>
-                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
 
+    <ng-container *ngIf="currentFrame$ | async as currentFrame">
+        <div class="mt-6 space-y-2">
+            <label class="block text-gray-700 font-medium">Enter roll:</label>
 
-                    <!-- 10th frame -->
-                    <td *ngIf="i === 9" class="cell-first-attempt">
-                        {{ frame.attempts.length > 0 ? (frame.attempts[0].pins === 10 ? 'X' : frame.attempts[0].pins) :
-                        '' }}
-                    </td>
-                    <td *ngIf="i === 9" class="cell-second-attempt">
-                        {{ frame.attempts.length > 1
-                        ? (frame.attempts[1].pins === 10 ? 'X'
-                        : (frame.attempts[0].pins + frame.attempts[1].pins === 10 ? '/' : frame.attempts[1].pins))
-                        : '' }}
-                    </td>
-                    <td *ngIf="i === 9" class="cell-third-attempt">
-                        {{ frame.attempts.length > 2
-                        ? (frame.attempts[2].pins === 10 ? 'X' : frame.attempts[2].pins)
-                        : '' }}
-                    </td>
-                </ng-container>
-            </tr>
+            <div class="flex flex-wrap gap-2">
+                <button *ngFor="let p of [].constructor(10); let i = index" (click)="submitAttempt(i)"
+                    [disabled]="(isGameCompleted$ | async) || getDisabledPins(currentFrame)[i]"
+                    class="w-10 h-10 bg-gray-200 text-gray-800 font-bold rounded hover:bg-gray-300 disabled:opacity-50">
+                    {{ i }}
+                </button>
 
-            <tr class="scores-row">
-                <ng-container *ngFor="let frame of frames; let i = index">
-                    <td [attr.colspan]="i === 9 ? 3 : 2" class="score-cell">
-                        {{ frame.score ?? '' }}
-                    </td>
-                </ng-container>
-            </tr>
-        </tbody>
+                <button (click)="submitAttempt('X')"
+                    [disabled]="(isGameCompleted$ | async) || disableStrike(currentFrame)"
+                    class="w-10 h-10 bg-red-500 text-white font-bold rounded hover:bg-red-600 disabled:opacity-50">
+                    X
+                </button>
 
-    </table>
+                <button (click)="submitAttempt('/')"
+                    [disabled]="(isGameCompleted$ | async) || disableSpare(currentFrame)"
+                    class="w-10 h-10 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 disabled:opacity-50">
+                    /
+                </button>
+            </div>
 
-    <div class="total-score-cell">
+            <button class="mt-4 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900" (click)="resetGame()">
+                Reset
+            </button>
+        </div>
+    </ng-container>
+
+    <div class="text-center mt-4 pr-4 text-lg font-semibold">
         <span *ngIf="isGameCompleted$ | async">
-            <strong>Total:</strong> {{ totalScore$ | async }}
+            🏆 Total: <span class="text-green-600">{{ totalScore$ | async }}</span>
         </span>
     </div>
 
-    <div *ngIf="isGameCompleted$ | async" class="game-over">
-        <h3>🎉 Game Over</h3>
-        <button (click)="resetGame()">Start New Game</button>
+    <div *ngIf="isGameCompleted$ | async" class="text-center mt-4">
+        <h3 class="text-xl font-bold text-blue-600">🎉 Game Over</h3>
+        <button (click)="resetGame()"
+            class="mt-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600">
+            Start New Game
+        </button>
     </div>
-</ng-container>
-
-<ng-container *ngIf="currentFrame$ | async as currentFrame">
-    <div class="controls">
-        <label>Enter roll:</label>
-
-        <!-- Pin buttons 0–10 -->
-        <button *ngFor="let p of [].constructor(10); let i = index" (click)="submitAttempt(i)"
-            [disabled]="(isGameCompleted$ | async) || getDisabledPins(currentFrame)[i]">
-            {{ i }}
-        </button>
-
-        <!-- Btn for Strike -->
-        <button (click)="submitAttempt('X')" [disabled]="(isGameCompleted$ | async) || disableStrike(currentFrame)">
-            X
-        </button>
-
-        <!-- Btn for Spare -->
-        <button (click)="submitAttempt('/')" [disabled]="(isGameCompleted$ | async) || disableSpare(currentFrame)">
-            /
-        </button>
-
-        <button class="reset" (click)="resetGame()">Reset</button>
-    </div>
-</ng-container>
+</div>
