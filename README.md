@@ -62,6 +62,7 @@ ng test
 - Responsive UI
 
 ## Project Structure
+```bash
 src/
 ├── app/
 │   ├── core/
@@ -75,3 +76,4 @@ src/
 │   ├── components/
 │   │   └── game-board/                   # UI for scoring interface
 │   └── app.module.ts
+```
