@@ -1,34 +1,43 @@
-# BowlingScorecard
+# Bowling Scorecard App 🎳
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+A bowling score calculator built with Angular (v19.2.0) and NgRx.
+This app tracks and calculates scores frame by frame, handling strikes, spares, oepn frames, and the special logic of the 10th frame.
+It includes unit test coverage for scoring engine, NgRx store, and component behaviours.
 
-## Development server
+---
 
-To start a local development server, run:
+## Tech Stack
+
+- **Angular CLI** v19.2.0
+- **NgRx** for state management
+- **Karma & Jasmine** for unit testing
+- **Tailwind CSS** for UI styling (if applicable)
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- Angular CLI (`npm install -g @angular/cli`)
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start development server
 
 ```bash
 ng serve
 ```
-
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-## Code scaffolding
+### Building
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Create a production-ready build:
 
 ```bash
 ng build
@@ -36,7 +45,7 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
-## Running unit tests
+### Running unit tests
 
 To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
 
@@ -44,16 +53,25 @@ To execute unit tests with the [Karma](https://karma-runner.github.io) test runn
 ng test
 ```
 
-## Running end-to-end tests
+## Features
+- Score calcualtion per frame
+- Strike and spare handling
+- Cumulative score tracking
+- NgRx store: actions, reducers, selectors
+- Unit-tested
+- Responsive UI
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Project Structure
+src/
+├── app/
+│   ├── core/
+│   │   └── services/
+│   │       └── scoring.service.ts        # Score calculation logic
+│   ├── store/
+│   │   ├── actions/
+│   │   ├── reducers/
+│   │   ├── selectors/
+│   │   └── state/
+│   ├── components/
+│   │   └── game-board/                   # UI for scoring interface
+│   └── app.module.ts
