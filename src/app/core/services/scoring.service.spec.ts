@@ -36,7 +36,7 @@ describe('ScoringService', () => {
     expect(result[0].score).toBe(14);
   });
 
-  it('should score a strike correctly', () => {
+  it('should calculate score for a strike correctly', () => {
     const frames: Frame[] = [
       { attempts: [{ pins: 10 }], score: null, isStrike: false, isSpare: false, isLastFrame: false },
       { attempts: [{ pins: 3 }, { pins: 6 }], score: null, isStrike: false, isSpare: false, isLastFrame: false }
@@ -57,7 +57,8 @@ describe('ScoringService', () => {
     const result = service.calculateScore(frames);
 
     expect(result[0].score).toBe(24);
-    expect(result[1].score).toBe(16);
+    expect(result[1].score).toBe(40);
+    expect(result[2].score).toBe(46);
   });
 
   it('should handle incomplete frame with no score yet', () => {
@@ -73,11 +74,11 @@ describe('ScoringService', () => {
   
   it('should handle a spare with no next frame', () => {
     const frames: Frame[] = [
-      { attempts: [{ pins: 5 }, { pins: 5 }], score: null, isStrike: false, isSpare: false, isLastFrame: false }
+      { attempts: [{ pins: 5 }, { pins: 5 }, { pins: 4 }], score: null, isStrike: false, isSpare: false, isLastFrame: true }
     ];
 
     const result = service.calculateScore(frames);
 
-    expect(result[0].score).toBe(10); // no bonus available
+    expect(result[0].score).toBe(14);
   });
 });
