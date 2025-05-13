@@ -80,24 +80,24 @@
                 <label class="block text-gray-700 font-medium me-2">Click Number of Pins Knocked Down:</label>
                 <button *ngFor="let p of [].constructor(10); let i = index" (click)="submitAttempt(i)"
                     [disabled]="(isGameCompleted$ | async) || getDisabledPins(currentFrame)[i]"
-                    class="w-10 h-10 bg-gray-200 text-gray-800 font-bold rounded hover:bg-gray-300 disabled:opacity-50">
+                    class="w-10 h-10 bg-gray-200 text-gray-800 font-bold rounded hover:bg-gray-300 disabled:opacity-50 cursor-pointer">
                     {{ i }}
                 </button>
 
                 <button (click)="submitAttempt('X')"
                     [disabled]="(isGameCompleted$ | async) || disableStrike(currentFrame)"
-                    class="w-10 h-10 bg-red-500 text-white font-bold rounded hover:bg-red-600 disabled:opacity-50">
+                    class="w-10 h-10 bg-red-500 text-white font-bold rounded hover:bg-red-600 disabled:opacity-50 cursor-pointer">
                     X
                 </button>
 
                 <button (click)="submitAttempt('/')"
                     [disabled]="(isGameCompleted$ | async) || disableSpare(currentFrame)"
-                    class="w-10 h-10 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 disabled:opacity-50">
+                    class="w-10 h-10 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 disabled:opacity-50 cursor-pointer">
                     /
                 </button>
             </div>
 
-            <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900" (click)="resetGame()">
+            <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 cursor-pointer" (click)="resetGame()">
                 Reset
             </button>
         </div>
@@ -106,7 +106,7 @@
     <div *ngIf="isGameCompleted$ | async" class="text-center mt-4">
         <h3 class="text-xl font-bold text-blue-600">Game Over</h3>
         <button (click)="resetGame()"
-            class="mt-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600">
+            class="mt-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 curor-pointer">
             Start New Game
         </button>
     </div>
