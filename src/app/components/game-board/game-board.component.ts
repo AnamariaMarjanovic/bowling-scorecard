@@ -124,6 +124,34 @@ export class GameBoardComponent {
     return frame.attempts.length !== 0;
   }
 
+  shouldShowScore(frames: Frame[], index: number): boolean {
+    const frame = frames[index];
+    if (frame.score == null) return false;
+
+    const isStrike = frame.attempts.length === 1 && frame.attempts[0]?.pins === 10;
+    const isSpare = frame.attempts.length === 2 && (frame.attempts[0].pins + frame.attempts[1].pins === 10);
+    const isOpenFrame = frame.attempts.length === 2 && (frame.attempts[0].pins + frame.attempts[1].pins < 10);
+    const isTenth = index === 9;
+
+    if (isTenth) return true;
+
+    if (isOpenFrame) return true;
+
+    if (isSpare) {
+      return frames[index + 1]?.attempts.length >= 1;
+    }
+
+    if (isStrike) {
+      const next = frames[index + 1];
+      const after = frames[index + 2];
+
+      if (next?.attempts.length >= 2) return true;
+      if (next?.attempts.length === 1 && after?.attempts.length >= 1) return true;
+    }
+
+    return false;
+  }
+
   resetGame(): void {
     this.store.dispatch(resetGame());
   }

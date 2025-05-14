@@ -1,5 +1,5 @@
 <div class="relative grid p-10">
-    <h2 class="text-2xl font-bold text-center my-4">
+    <h2 class="text-2xl font-bold text-center my-4 mb-10">
         Bowling Scorecard
     </h2>
 
@@ -59,7 +59,12 @@
                         <ng-container *ngFor="let frame of frames; let i = index">
                             <td [attr.colspan]="i === 9 ? 3 : 2"
                                 class="border border-gray-300 py-1 font-medium text-gray-700 border-t-0 min-h-[50px]">
-                                {{ frame.score ?? '&nbsp;' }}
+                                <ng-container *ngIf="shouldShowScore(frames, i)">
+                                    {{ frame.score }}
+                                </ng-container>
+                                <ng-container *ngIf="!shouldShowScore(frames, i)">
+                                    &nbsp;
+                                </ng-container>
                             </td>
                         </ng-container>
                     </tr>
@@ -74,10 +79,10 @@
     </ng-container>
 
     <ng-container *ngIf="currentFrame$ | async as currentFrame">
-        <div class="mt-6 space-y-2 flex flex-row justify-around">
+        <div class="mt-6 space-y-2 flex flex-row justify-center">
 
             <div class="flex flex-wrap gap-2">
-                <label class="block text-gray-700 font-medium me-2">Click Number of Pins Knocked Down:</label>
+                <label class="block text-gray-700 font-medium me-2 flex items-center">Click Number of Pins Knocked Down:</label>
                 <button *ngFor="let p of [].constructor(10); let i = index" (click)="submitAttempt(i)"
                     [disabled]="(isGameCompleted$ | async) || getDisabledPins(currentFrame)[i]"
                     class="w-10 h-10 bg-gray-200 text-gray-800 font-bold rounded hover:bg-gray-300 disabled:opacity-50 cursor-pointer">
@@ -97,16 +102,20 @@
                 </button>
             </div>
 
-            <button class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 cursor-pointer" (click)="resetGame()">
-                Reset
-            </button>
+            <div class="ml-6">
+                <button *ngIf="!(isGameCompleted$ | async)"
+                    class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 cursor-pointer"
+                    (click)="resetGame()">
+                    Reset
+                </button>
+            </div>
         </div>
     </ng-container>
 
     <div *ngIf="isGameCompleted$ | async" class="text-center mt-4">
         <h3 class="text-xl font-bold text-blue-600">Game Over</h3>
         <button (click)="resetGame()"
-            class="mt-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 curor-pointer">
+            class="mt-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 cursor-pointer">
             Start New Game
         </button>
     </div>
